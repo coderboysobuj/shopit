@@ -1,7 +1,4 @@
 import PageHeading from "@/components/admin/page-heading";
-import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { MoreHorizontal, PlusIcon } from "lucide-react";
 import { db } from "@/lib/db";
 import {
   Table,
@@ -11,23 +8,39 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-export default async function CategoriesPage() {
+} from "@/components/ui/table";
+
+import PaginationBar from "@/components/pagination-bar";
+import TableAction from "./table-action";
+import PageToolbar from "./page-toolbar";
+type CategoriesPageProps = {
+  searchParams: {
+    page: string;
+  };
+};
+export default async function CategoriesPage({
+  searchParams: { page = "1" },
+}: CategoriesPageProps) {
+  const currentPage = parseInt(page);
+  const pageSize = 3;
+
+  const totalItemCount = await db.category.count();
+  const totalPages = Math.ceil(totalItemCount / pageSize);
 
   const categories = await db.category.findMany({
+    skip: (currentPage - 1) * pageSize,
+    take: pageSize,
     orderBy: {
-      createdAt: 'desc'
-    }
+      createdAt: "desc",
+    },
   });
 
   return (
-    <div className="hidden h-full flex-1 flex-col space-y-8 md:flex">
-      <PageHeading title="Category" description="Manage categories" toolbar={
-        <Link className={buttonVariants()} href="/admin/categories/new">
-          <PlusIcon className='h-4 w-4 mr-2' />
-          Create a Category
-        </Link>
-      }
+    <div className="flex-1 flex-col space-y-8 md:flex">
+      <PageHeading
+        title="Category"
+        description="Manage categories"
+        toolbar={<PageToolbar />}
       />
       <Table>
         <TableCaption>A list of categories.</TableCaption>
@@ -39,20 +52,30 @@ export default async function CategoriesPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {categories.map(category => (
+          {categories.map((category) => (
             <TableRow key={category.id}>
               <TableCell>{category.id}</TableCell>
               <TableCell>{category.name}</TableCell>
-              <TableCell>{category.createdAt.toString()}</TableCell>
               <TableCell>
-                <Button variant='ghost' size='icon'>
-                  <MoreHorizontal />
-                </Button>
+                {new Intl.DateTimeFormat("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }).format(new Date(category.createdAt))}
+              </TableCell>
+              <TableCell>
+                <TableAction category={category} />
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      {totalItemCount > pageSize ? (
+        <div className="flex items-center justify-center w-full">
+          <PaginationBar currentPage={currentPage} totalPages={totalPages} />
+        </div>
+      ) : null}
     </div>
-  )
+  );
 }

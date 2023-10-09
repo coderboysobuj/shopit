@@ -13,23 +13,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@/components/ui/hover-card"
+} from "@/components/ui/hover-card";
 import PaginationBar from "@/components/pagination-bar";
 
 type PageProps = {
   searchParams: {
-    page: string
-  }
-}
+    page: string;
+  };
+};
 
-export default async function ProductsPage({ searchParams: { page = '1' } }: PageProps) {
-
+export default async function ProductsPage({
+  searchParams: { page = "1" },
+}: PageProps) {
   const currentPage = parseInt(page);
   const pageSize = 10;
 
@@ -40,34 +41,37 @@ export default async function ProductsPage({ searchParams: { page = '1' } }: Pag
       category: {
         select: {
           id: true,
-          name: true
-        }
-      }
+          name: true,
+        },
+      },
     },
     skip: (currentPage - 1) * pageSize,
     take: pageSize,
     orderBy: {
-      createdAt: 'desc'
-    }
-  })
+      createdAt: "desc",
+    },
+  });
 
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 md:flex">
-      <PageHeading title="Products" description="Manage you products" toolbar={
-        <Link className={buttonVariants()} href="/admin/products/new">
-          <PlusIcon className='h-4 w-4 mr-2' />
-          Create a Product
-        </Link>
-      }
+      <PageHeading
+        title="Products"
+        description="Manage you products"
+        toolbar={
+          <Link className={buttonVariants()} href="/admin/products/new">
+            <PlusIcon className="h-4 w-4 mr-2" />
+            Create a Product
+          </Link>
+        }
       />
 
       {products.length < 1 ? (
-
         <div className="flex flex-col items-center justify-center">
-          <h5 className='text-muted-foreground text-2xl'>No product in database</h5>
+          <h5 className="text-muted-foreground text-2xl">
+            No product in database
+          </h5>
         </div>
       ) : (
-
         <Table>
           <TableCaption>A list of products.</TableCaption>
           <TableHeader>
@@ -79,24 +83,33 @@ export default async function ProductsPage({ searchParams: { page = '1' } }: Pag
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map(product => (
+            {products.map((product) => (
               <TableRow key={product.id}>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>
-
                   <HoverCard>
                     <HoverCardTrigger>
-                      <Image src={product.image} alt="Product Image" height={50} width={50} />
+                      <Image
+                        src={product.image}
+                        alt="Product Image"
+                        height={50}
+                        width={50}
+                      />
                     </HoverCardTrigger>
                     <HoverCardContent>
-                      <Image src={product.image} alt="Product Image" height={500} width={500} />
+                      <Image
+                        src={product.image}
+                        alt="Product Image"
+                        height={500}
+                        width={500}
+                      />
                     </HoverCardContent>
                   </HoverCard>
                 </TableCell>
                 <TableCell>{product.category.name}</TableCell>
-                <TableCell>{product.price.toString()}</TableCell>
+                <TableCell>${product.price.toFixed(2)}</TableCell>
                 <TableCell>
-                  <Button variant='ghost' size="icon">
+                  <Button variant="ghost" size="icon">
                     <MoreHorizontal />
                   </Button>
                 </TableCell>
@@ -111,5 +124,5 @@ export default async function ProductsPage({ searchParams: { page = '1' } }: Pag
         </div>
       ) : null}
     </div>
-  )
+  );
 }
